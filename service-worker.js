@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'uoem-mulembe-';
-const CACHE_NAME = `${CACHE_PREFIX}shell-v2`;
+const CACHE_NAME = `${CACHE_PREFIX}shell-v3`;
 const GALLERY_PHOTOS = [
   './1795606862985.jpg',
   './1795606866383.jpg',
@@ -29,12 +29,14 @@ const APP_SHELL = [
   './events.html',
   './budget.html',
   './documents.html',
+  './opportunities.html',
   './members.html',
   './gallery.html',
   './donations.html',
   './contact.html',
   './styles.css',
   './app.js',
+  './opportunities.js',
   './manifest.json',
   './service-worker.js',
   './IMG-20261124-WA0001.jpg',
@@ -47,7 +49,8 @@ const APP_SHELL = [
   './data/proposed-budget-2026-27.json',
   './data/proposed-budget-2026-27.csv',
   './data/gallery-manifest.json',
-  './data/donation-client-config.json'
+  './data/donation-client-config.json',
+  './data/opportunities-client-config.json'
 ];
 
 self.addEventListener('install', event => {

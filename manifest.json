@@ -45,6 +45,12 @@
       "icons": [{ "src": "assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
+      "name": "Global Opportunities",
+      "short_name": "Opportunities",
+      "url": "./opportunities.html",
+      "icons": [{ "src": "assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
       "name": "Support MULEMBE Union",
       "short_name": "Support",
       "url": "./donations.html",

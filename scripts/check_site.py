@@ -32,6 +32,7 @@ class PageParser(HTMLParser):
         self._in_title = False
         self._in_h1 = False
         self._form_count = 0
+        self._opportunity_filter_form_count = 0
         self._password_input_count = 0
         self.page_slug = ""
 
@@ -46,7 +47,10 @@ class PageParser(HTMLParser):
         if tag == "h1":
             self._in_h1 = True
         if tag == "form":
-            self._form_count += 1
+            if "data-opportunity-filters" in attributes and attributes.get("method", "get").lower() == "get":
+                self._opportunity_filter_form_count += 1
+            else:
+                self._form_count += 1
         if tag == "input" and attributes.get("type", "").lower() == "password":
             self._password_input_count += 1
         if tag == "a":
@@ -159,6 +163,10 @@ def main() -> None:
                 fail(f"Facebook links must open safely in a new tab ({route})")
         if parser._form_count or parser._password_input_count:
             fail(f"unexpected public form/password collection on {route}")
+        if route == "opportunities.html" and parser._opportunity_filter_form_count != 1:
+            fail("the Opportunities route must have one safe GET-only filter form")
+        if route != "opportunities.html" and parser._opportunity_filter_form_count:
+            fail(f"unexpected Opportunities filter form on {route}")
         all_parsers[route] = parser
 
     leadership_portraits = {
@@ -279,13 +287,15 @@ def main() -> None:
         icon_path = (ROOT / unquote(urlparse(icon.get("src", "")).path)).resolve()
         if not icon_path.is_relative_to(ROOT.resolve()) or not icon_path.is_file():
             fail(f"PWA icon is missing or unsafe: {icon.get('src', '')}")
+    if not any(shortcut.get("url") == "./opportunities.html" for shortcut in manifest.get("shortcuts", [])):
+        fail("the PWA manifest must include a relative Global Opportunities shortcut")
     worker_path = ROOT / "service-worker.js"
     if not worker_path.is_file():
         fail("the PWA service worker is missing")
     worker = worker_path.read_text(encoding="utf-8")
     if "addEventListener('fetch'" not in worker or "cache.addAll(APP_SHELL)" not in worker:
         fail("the service worker must pre-cache the app shell and handle offline fetches")
-    for required_cache_path in ["'./donations.html'", "'./data/gallery-manifest.json'", "'./data/donation-client-config.json'"] + [f"'./{source}'" for source in sources]:
+    for required_cache_path in ["'./donations.html'", "'./opportunities.html'", "'./opportunities.js'", "'./data/gallery-manifest.json'", "'./data/donation-client-config.json'", "'./data/opportunities-client-config.json'"] + [f"'./{source}'" for source in sources]:
         if required_cache_path not in worker:
             fail(f"the PWA offline shell does not include required route/data/photo: {required_cache_path}")
 
@@ -296,7 +306,7 @@ def main() -> None:
     if not icon_sprite.is_file():
         fail("the shared icon sprite is missing")
     sprite = icon_sprite.read_text(encoding="utf-8")
-    for symbol in ("home", "union", "events", "members", "more", "about", "leadership", "updates", "gallery", "budget", "documents", "contact", "support", "search", "menu"):
+    for symbol in ("home", "union", "events", "members", "more", "about", "leadership", "updates", "gallery", "budget", "documents", "opportunities", "contact", "support", "search", "menu"):
         if f'id="{symbol}"' not in sprite:
             fail(f"navigation icon is missing: {symbol}")
 
@@ -357,6 +367,23 @@ def main() -> None:
         if forbidden_secret.lower() in client_js.lower():
             fail("Daraja secrets must never be embedded in frontend JavaScript")
 
+    opportunities_config_path = ROOT / "data" / "opportunities-client-config.json"
+    if not opportunities_config_path.is_file():
+        fail("the public Opportunities API client configuration is missing")
+    opportunities_config = json.loads(opportunities_config_path.read_text(encoding="utf-8"))
+    if opportunities_config != {"contractVersion": 1, "apiBaseUrl": "https://mulembeapi-g9qixcaj.manus.space", "pageSize": 10}:
+        fail("the Opportunities client must use the verified HTTPS API origin and bounded page size")
+    opportunities_html = (ROOT / "opportunities.html").read_text(encoding="utf-8")
+    opportunities_js = (ROOT / "opportunities.js").read_text(encoding="utf-8")
+    for required_text in ("verified opportunities", "pending or unverified", "No verified opportunities are available"):
+        if required_text.lower() not in opportunities_html.lower() and required_text.lower() not in opportunities_js.lower():
+            fail(f"the Opportunities page is missing its public verification/empty-state disclosure: {required_text}")
+    for required_contract in ("/api/v1/opportunities", "deadlineBefore", "pageSize", "credentials: 'omit'", "createTextNode", "textContent = String(text)", "applicationLink", "sourceLink", "/api/v1/opportunities/${encodeURIComponent(id)}"):
+        if required_contract not in opportunities_js:
+            fail(f"the Opportunities UI is missing safe API integration behavior: {required_contract}")
+    if "innerHTML" in opportunities_js or "pending_verification" in opportunities_js:
+        fail("the public Opportunities renderer must not inject untrusted HTML or expose unverified candidates")
+
     checks = {
         "updates.html": "no verified notices yet",
         "events.html": "not confirmed or scheduled events",
@@ -375,6 +402,7 @@ def main() -> None:
     print("PASS: official logo preserved; supplied portraits and budget PDF resolve and are integrated")
     print("PASS: supplied portrait filenames match their assigned roles; University delegate is separately recognized")
     print("PASS: relative PWA manifest, icons and offline-capable service worker are present")
+    print("PASS: Opportunities route is indexed, cached offline, and uses safe filtered list/detail API requests")
     print("PASS: supplied Facebook link is consistent and uses safe external-link attributes")
     print("PASS: proposed income/allocation totals reconcile; actual financials remain unknown")
     print(f"PASS: all {len(gallery_manifest)} repository photo files are listed once with supported categories and no exact duplicates")

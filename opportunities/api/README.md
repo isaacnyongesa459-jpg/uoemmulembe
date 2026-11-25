@@ -4,7 +4,7 @@ This package is the backend source of truth for the separately hosted API. It is
 
 ## Delivered scope
 
-The service is a JavaScript/Node.js 22 Express API backed by managed MySQL. It currently exposes public read-only endpoints, a liveness check, a database readiness check, structured request/error logs, bounded query validation, exact-origin CORS, and per-instance rate limiting. No write, ingest, admin, authentication, scheduler, or public-page integration endpoints exist yet. The database starts without sample listings, so the public feed is empty until a later reviewed ingestion/review workflow is built.
+The service is a JavaScript/Node.js 22 Express API backed by managed MySQL. It exposes public read-only endpoints, a liveness check, a database readiness check, structured request/error logs, bounded query validation, exact-origin CORS, and per-instance rate limiting. The existing GitHub Pages site consumes the list and detail GET endpoints from its Opportunities page; the API itself remains read-only. No write, ingest, admin, authentication, or scheduler endpoints exist yet. The database starts without sample listings, so the public feed is empty until a reviewed ingestion workflow is built.
 
 Public records are returned only when `status = 'active'`, `verified_at` is set, and a date deadline has not passed. Internal review notes, verification flags, candidate application URLs, source-management data, and suspicious-listing flags are not selected into public responses. A reviewer workflow must set the verified fields; discovery alone never publishes a record.
 
@@ -53,4 +53,4 @@ The deployment copy has its own WebDev-managed Git/checkpoint history. A change 
 
 ## Work intentionally left for later
 
-The separately approved backend foundation does not yet include compliant multi-source scheduled scraping, the ingestion/upsert path, expiration jobs, admin authentication/authorization, review actions/history endpoints, source/category management endpoints, manual run controls, or connecting the existing public Opportunities UI to this API. Those features remain pending rather than being represented as complete.
+The separately approved backend foundation does not yet include compliant multi-source scheduled scraping, the ingestion/upsert path, expiration jobs, admin authentication/authorization, review actions/history endpoints, source/category management endpoints, or manual run controls. These features remain pending rather than being represented as complete. The public Pages UI is delivered separately and consumes only the read-only public API.

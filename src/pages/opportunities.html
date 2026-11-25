@@ -1,0 +1,24 @@
+<section class="page-heading opportunity-heading"><div class="heading-copy"><p class="eyebrow">GLOBAL OPPORTUNITIES</p><h1>Find your next<br><span>opportunity.</span></h1><p>Browse active opportunities that have been reviewed and verified before publication. Applications are completed on the provider’s own website.</p></div><div class="heading-stat"><strong>API</strong><span>live public feed<br>verified listings only</span></div></section>
+
+<section class="opportunity-integrity" aria-label="Listing verification standard"><span class="status-dot" aria-hidden="true"></span><p><strong>Verified listings only.</strong> Pending or unverified discoveries are never shown here. Always confirm current requirements with the original provider.</p></section>
+
+<section class="opportunity-panel" data-opportunities-app aria-labelledby="opportunity-list-heading">
+  <form class="opportunity-filters" data-opportunity-filters method="get" action="opportunities.html" aria-label="Filter opportunities">
+    <div class="opportunity-search-field"><label for="opportunity-query">Search opportunities</label><input id="opportunity-query" name="q" type="search" maxlength="120" placeholder="Title, organization or keywords" autocomplete="off"></div>
+    <div><label for="opportunity-category">Category</label><select id="opportunity-category" name="category"><option value="">All categories</option><option value="jobs">Jobs</option><option value="scholarships">Scholarships</option><option value="fellowships">Fellowships</option><option value="grants_funding">Grants & funding</option><option value="volunteering">Volunteering</option><option value="technology">Technology</option><option value="courses_training">Courses & training</option><option value="entrepreneurship_startups">Entrepreneurship & startups</option><option value="conferences_programs">Conferences & programs</option><option value="other">Other</option></select></div>
+    <div><label for="opportunity-country">Country / location</label><input id="opportunity-country" name="country" type="search" maxlength="80" placeholder="e.g. Kenya" autocomplete="country-name"></div>
+    <div><label for="opportunity-deadline">Deadline on or before</label><input id="opportunity-deadline" name="deadlineBefore" type="date"></div>
+    <div><label for="opportunity-remote">Work mode</label><select id="opportunity-remote" name="remote"><option value="">Any work mode</option><option value="true">Remote only</option><option value="false">Not remote</option></select></div>
+    <div class="opportunity-filter-actions"><button class="button button-primary" type="submit" data-opportunity-submit>Apply filters</button><button class="button button-soft" type="reset">Clear</button></div>
+  </form>
+
+  <div class="opportunity-results-heading"><div><p class="eyebrow">PUBLIC FEED</p><h2 id="opportunity-list-heading">Available opportunities</h2></div><p class="opportunity-count" data-opportunity-count aria-live="polite"></p></div>
+  <p class="opportunity-feed-status" data-opportunity-status role="status" aria-live="polite" aria-atomic="true">Loading verified opportunities…</p>
+  <noscript><p class="opportunity-feed-status">Turn on JavaScript to load the live verified opportunities feed. Pending or unverified listings are not published.</p></noscript>
+  <div class="opportunity-results" data-opportunity-results aria-busy="true"></div>
+  <nav class="opportunity-pagination" data-opportunity-pagination aria-label="Opportunity result pages" hidden><button class="button button-soft" type="button" data-opportunity-previous>Previous</button><span data-opportunity-page></span><button class="button button-soft" type="button" data-opportunity-next>Next</button></nav>
+  <p class="opportunity-source-note">Listing details are supplied by the public API. Use the original source and application links shown for each opportunity to confirm terms and submit applications.</p>
+</section>
+
+<dialog class="opportunity-dialog" data-opportunity-dialog aria-labelledby="opportunity-dialog-title"><div class="opportunity-dialog-head"><div><p class="eyebrow">VERIFIED PUBLIC LISTING</p><h2 id="opportunity-dialog-title">Opportunity details</h2></div><button class="icon-button" type="button" data-opportunity-dialog-close aria-label="Close opportunity details">×</button></div><div class="opportunity-detail-content" data-opportunity-detail-content aria-live="polite"><p class="opportunity-feed-status">Loading details…</p></div></dialog>
+<script src="opportunities.js" defer></script>

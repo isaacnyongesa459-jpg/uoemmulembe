@@ -42,7 +42,9 @@ opportunities/
     public/manus-routes.json          # empty UI route list for this backend-only project
     test/                             # database-free HTTP, repository and schema tests
 
-src/pages/                            # existing static site; future public UI integration
+src/pages/opportunities.html          # public static UI for verified API records
+opportunities.js                      # isolated vanilla-JS list/detail API client
+data/opportunities-client-config.json # public API origin and bounded page-size setting
 ```
 
 ## Stage 1: compliant discovery scraper
@@ -65,9 +67,15 @@ The first adapter is [Opportunities for Youth](https://opportunitiesforyouth.org
 
 The sources reviewed did not establish a content-reuse license for republishing full descriptions. Stage 1 therefore keeps output local, limits summaries, preserves source links and marks every result for review. Before public display, a reviewer must confirm the official application link, eligibility, deadline and status against the originating provider.
 
+## Stage 3: existing GitHub Pages UI integration
+
+The existing static Pages site now includes a root-level `opportunities.html` route generated from the normal page manifest and shared shell. It is discoverable from the site search, sidebar, homepage feature cards and offline app shell; GitHub Pages configuration and the other routes remain unchanged. `opportunities.js` requests the configured HTTPS API origin with cross-origin credentials omitted, renders returned records using text nodes rather than HTML injection, and calls both `GET /api/v1/opportunities` and `GET /api/v1/opportunities/:id`. Supported controls map to `q`, `category`, `country`, `deadlineBefore`, `remote`, `page` and `pageSize`. Listing cards expose safe external provider application/source links; the detail dialog retrieves the full public record and provides loading, not-found/error, and close behavior. The page has explicit loading, empty-results, filtered-no-match, and service-error states. The service worker precaches the route, script and public API config, while API fetches remain network requests.
+
+The Pages origin is allowlisted by the deployed API, and the live list endpoint responds with the expected paginated empty dataset. No opportunity records were created or seeded, so no example listings are shown. The scraper still produces pending candidates only; no pending data is exposed by the UI.
+
 ## Remaining stages
 
-Stage 1 is implemented and tested. Stage 2's separate Express/MySQL API, additive schema migration, Preview behavior and published container are implemented and verified; unauthenticated API routes are reachable while the project landing page remains owner-only. Remaining work includes the compliant multi-source ingestion/upsert path, configurable daily scheduling, expiration processing, authenticated admin review and source/category management, operational history/log endpoints, and connecting the existing GitHub Pages UI to the API. Those later stages must preserve the public-only-active-reviewed rule and must not change Pages configuration without a separate explicit request.
+Stage 1 is implemented and tested. Stage 2's separate Express/MySQL API, additive schema migration, Preview behavior and published container are implemented and verified; unauthenticated API routes are reachable while the project landing page remains owner-only. Stage 3's public GitHub Pages interface is connected to the list and detail endpoints. Remaining backend work includes the compliant multi-source ingestion/upsert path, configurable daily scheduling, expiration processing, authenticated admin review and source/category management, and operational history/log endpoints. Those later stages must preserve the public-only-active-reviewed rule and must not change Pages configuration without a separate explicit request.
 
 ## References
 

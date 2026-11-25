@@ -20,6 +20,7 @@ ICON_BY_SLUG = {
     "gallery": "gallery",
     "budget": "budget",
     "documents": "documents",
+    "opportunities": "opportunities",
     "members": "members",
     "contact": "contact",
     "donations": "support",
