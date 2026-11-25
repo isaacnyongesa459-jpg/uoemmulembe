@@ -459,7 +459,7 @@ body.has-js .page-content { animation: page-enter .32s var(--ease) both; }
   .page-content { padding-inline: 13px; }
   .topbar { padding-inline: 13px; }
   .welcome-banner { grid-template-columns: 1fr; padding: 22px 18px 18px; }
-  .welcome-copy h1 { font-size: clamp(35px,9vw,48px); }
+  .welcome-copy h1 { font-size: clamp(30px,8vw,44px); }
   .welcome-lead { max-width: 400px; font-size: 9px; }
   .welcome-emblem { height: 160px; margin-top: 4px; }
   .emblem-disc { width: 132px; }
