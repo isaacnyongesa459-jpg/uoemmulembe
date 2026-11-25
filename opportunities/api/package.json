@@ -1,0 +1,26 @@
+{
+  "name": "mulembe-union-opportunities-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "npm@10.9.9",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "dev": "node --watch src/server.mjs",
+    "test": "node --test",
+    "db:inspect": "node src/database/inspect-schema.mjs",
+    "db:status": "node src/database/migrate-cli.mjs --status",
+    "db:migrate": "node src/database/migrate-cli.mjs"
+  },
+  "dependencies": {
+    "cors": "2.8.6",
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.5",
+    "helmet": "8.3.0",
+    "mysql2": "3.24.6",
+    "zod": "4.6.7"
+  }
+}

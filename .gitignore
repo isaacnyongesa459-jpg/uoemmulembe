@@ -5,3 +5,9 @@ __pycache__/
 /opportunities/scraper/node_modules/
 /opportunities/scraper/out/
 /opportunities/scraper/.env
+
+# Local Global Opportunities API dependencies and secrets
+/opportunities/api/node_modules/
+/opportunities/api/.env
+/opportunities/api/.env.*
+!/opportunities/api/.env.example
