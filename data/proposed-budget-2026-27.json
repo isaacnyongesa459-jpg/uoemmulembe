@@ -1,0 +1,44 @@
+{
+  "title": "UOEM Mulembe Union proposed budget and annual course of action, AY 2026/2027",
+  "dataStatus": "PROPOSED_ONLY",
+  "sourceStatus": "Figures transcribed from the supplied project brief; original PDF was not present in the repository or attachments.",
+  "originalPdfAvailable": false,
+  "financialYear": {
+    "start": "2026-05",
+    "end": "2027-04",
+    "label": "May 2026 – April 2027"
+  },
+  "currency": "KES",
+  "income": [
+    { "category": "Executive contributions", "amount": 9000 },
+    { "category": "Year representatives", "amount": 3000 },
+    { "category": "County representatives", "amount": 5000 },
+    { "category": "Judiciary", "amount": 2500 },
+    { "category": "Active member contributions", "amount": 20000 },
+    { "category": "Continuing student subscriptions", "amount": 5000 },
+    { "category": "Weekly online drive", "amount": 20000 },
+    { "category": "New members’ subscriptions", "amount": 5000 }
+  ],
+  "proposedIncomeTotal": 69500,
+  "allocations": [
+    { "category": "Vikings semi-annual budget", "amount": 6000 },
+    { "category": "First Years’ Bash", "amount": 10000 },
+    { "category": "Annual General Meeting", "amount": 15000 },
+    { "category": "Comrade welfare", "amount": 10000 },
+    { "category": "Emergency fund", "amount": 10000 },
+    { "category": "Culfest attire purchase", "amount": 8000 }
+  ],
+  "proposedAllocationTotal": 59000,
+  "accountsNamedInBrief": [
+    "Mulembe Union Events Account",
+    "Comrade Welfare Account",
+    "Mulembe UESA Politics Account",
+    "Mulembe Communications Account",
+    "Team Vikings Account"
+  ],
+  "actualTransactions": [],
+  "actualIncome": null,
+  "actualExpenditure": null,
+  "actualBalance": null,
+  "disclaimer": "These amounts are proposed figures from the supplied project brief. They are not evidence of funds received, approved commitments, actual expenditure, account balances, or completed activity. This JSON is a transcription summary and is not a replacement for the official source PDF."
+}
