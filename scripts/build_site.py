@@ -22,6 +22,7 @@ ICON_BY_SLUG = {
     "documents": "documents",
     "members": "members",
     "contact": "contact",
+    "donations": "support",
 }
 MOBILE_TABS = (
     ("home", "Home", "home"),
@@ -87,6 +88,57 @@ def make_mobile_nav(pages: list[dict[str, str]], current_slug: str) -> str:
     return "\n      ".join(links)
 
 
+def gallery_markup() -> tuple[str, str, int]:
+    """Generate usable no-JS gallery cards from the committed image manifest."""
+    manifest_path = ROOT / "data" / "gallery-manifest.json"
+    records = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(records, list) or not records:
+        raise SystemExit("data/gallery-manifest.json must contain a non-empty photo list")
+    seen: set[str] = set()
+    categories: list[str] = []
+    cards: list[str] = []
+    for index, record in enumerate(records):
+        required = ("src", "category", "caption", "alt", "width", "height")
+        if any(not record.get(key) for key in required):
+            raise SystemExit(f"Gallery record {index} is missing a required field")
+        src = str(record["src"])
+        if src in seen:
+            raise SystemExit(f"Duplicate gallery source: {src}")
+        seen.add(src)
+        image_path = (ROOT / src).resolve()
+        if not image_path.is_relative_to(ROOT.resolve()) or not image_path.is_file():
+            raise SystemExit(f"Gallery image is missing or unsafe: {src}")
+        category = str(record["category"])
+        if category not in categories:
+            categories.append(category)
+        safe_src = html.escape(src, quote=True)
+        safe_cat = html.escape(category, quote=True)
+        safe_caption = html.escape(str(record["caption"]))
+        safe_alt = html.escape(str(record["alt"]), quote=True)
+        width, height = int(record["width"]), int(record["height"])
+        role = str(record.get("role", ""))
+        boundary = str(record.get("boundary", ""))
+        caption_lines = [f'<span class="gallery-kind">{html.escape(category.upper())}</span>']
+        if role:
+            caption_lines.append(f"<strong>{html.escape(role)}</strong>")
+        caption_lines.append(f'<small>{safe_caption}</small>')
+        if boundary:
+            caption_lines.append(f'<small class="gallery-boundary">{html.escape(boundary)}</small>')
+        cards.append(
+            f'<figure class="gallery-card" data-gallery-card data-category="{safe_cat}">'
+            f'<a class="gallery-image-link" href="{safe_src}" target="_blank" rel="noopener noreferrer" '
+            f'data-gallery-open data-gallery-index="{index}" aria-label="Open full-size photo {index + 1}: {safe_alt}">'
+            f'<img src="{safe_src}" width="{width}" height="{height}" alt="{safe_alt}" loading="lazy" decoding="async">'
+            '<span class="gallery-open-mark" aria-hidden="true">↗</span></a>'
+            f'<figcaption>{"".join(caption_lines)}</figcaption></figure>'
+        )
+    filters = ['<button class="gallery-filter is-active" type="button" data-gallery-filter="all" aria-pressed="true">All photos</button>']
+    for category in categories:
+        safe = html.escape(category, quote=True)
+        filters.append(f'<button class="gallery-filter" type="button" data-gallery-filter="{safe}" aria-pressed="false">{html.escape(category)}</button>')
+    return "\n".join(filters), "\n".join(cards), len(records)
+
+
 def main() -> None:
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
     pages = json.loads(PAGES_PATH.read_text(encoding="utf-8"))
@@ -98,6 +150,7 @@ def main() -> None:
         raise SystemExit("Page slugs and output routes must be unique")
     if "home" not in slugs or "index.html" not in routes:
         raise SystemExit("The route manifest must define the home page as index.html")
+    gallery_filters, gallery_cards, gallery_count = gallery_markup()
     for page in pages:
         slug = page.get("slug", "")
         if slug not in ICON_BY_SLUG:
@@ -111,6 +164,9 @@ def main() -> None:
         if not fragment_path.is_file():
             raise SystemExit(f"Page content is missing: {fragment_path.relative_to(ROOT)}")
         content = fragment_path.read_text(encoding="utf-8")
+        content = content.replace("{{GALLERY_FILTERS}}", gallery_filters)
+        content = content.replace("{{GALLERY_CARDS}}", gallery_cards)
+        content = content.replace("{{GALLERY_COUNT}}", str(gallery_count))
         values = {
             "{{TITLE}}": html.escape(page["title"]),
             "{{DESCRIPTION}}": html.escape(page["description"], quote=True),
@@ -120,6 +176,7 @@ def main() -> None:
             "{{MOBILE_NAV}}": make_mobile_nav(pages, slug),
             "{{CONTENT}}": content,
             "{{SEARCH_INDEX}}": safe_search_json(pages),
+            "{{MORE_ACTIVE}}": " is-active" if page["tab"] == "more" else "",
         }
         rendered = template
         for key, value in values.items():

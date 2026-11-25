@@ -1,36 +1,39 @@
-# GitHub Pages deployment status
+# GitHub Pages deployment
 
-## Verified live website
-
-The redesigned website is live at <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. GitHub's Pages API reports the existing source as `main` at `/` (`build_type: legacy`), and the public URL serves the generated HTML and assets from that root.
-
-After the redesign was pushed, a direct HTTP smoke check received status 200 for all ten routes (`index.html`, `about.html`, `leadership.html`, `updates.html`, `events.html`, `gallery.html`, `budget.html`, `documents.html`, `members.html`, `contact.html`) and all six required assets (CSS, JavaScript, logo, icon sprite and budget JSON/CSV). Titles and the exact supplied Facebook destination were verified on every route.
+## Website and repository
 
 - Website: <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>
 - Repository: <https://github.com/isaacnyongesa459-jpg/uoemmulembe>
 - Pages settings: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/settings/pages>
-- Actions workflow: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/workflows/pages.yml>
-- Successful initial redesign run, including `Deploy site`: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45608739113>
+- Actions validation: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/workflows/pages.yml>
 
-## Publishing model
+GitHub Pages is configured to serve the `main` branch root (legacy source). Committed root-level HTML, styles, scripts, data and image assets update the public site. The repository's Actions job builds and validates the static pages; it does not start a second `actions/deploy-pages` publisher. If the repository administrator changes the Pages source to GitHub Actions, the workflow and source setting must be changed together.
 
-GitHub Pages is configured to publish the repository's `main` branch root. Committing generated root-level HTML, CSS, JavaScript, image, icon and data files updates the public website. The Actions workflow therefore builds and validates the static routes but does not run a second `actions/deploy-pages` publication.
+The shared template, route metadata and page fragments live under `src/`. Run `python3 scripts/build_site.py` to generate the eleven root-level routes. Paths remain relative to the repository's `/uoemmulembe/` subpath.
 
-An earlier workflow revision attempted both branch-root publishing and a separate Actions deployment. The initial redesign run [45608739113](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45608739113) deployed successfully; on the subsequent documentation-only run [45609161369](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45609161369), validation succeeded but `Deploy site` failed after creating a deployment with `Deployment failed, try again later`, including on retry. The branch-root Pages site continued serving the redesigned routes. To align the workflow with the configured Pages source and avoid duplicate publishers, the workflow now keeps build, site validation and JavaScript syntax checks only.
+## Gallery and PWA
 
-If the repository administrator later changes Pages **Build and deployment → Source** from the main-branch root to **GitHub Actions**, update the workflow to use a Pages artifact and deployment job at the same time.
+`data/gallery-manifest.json` is the curated, committed image list required by static hosting. It covers the 17 discovered uploaded photographs across the repository, with branding/app-icon files excluded. The validator requires exact correspondence between this manifest and repository photo files, rejects exact duplicate image content, verifies supplied role mappings and ensures the generated page includes every photo once. The build emits image cards so the gallery remains useful without JavaScript; JavaScript adds category filters and the accessible full-screen lightbox.
 
-## Published files
+The service worker cache was revised for the Donations route, gallery manifest, disabled donation configuration and all 17 gallery photographs. The donation configuration is fetched network-first while online and falls back to its last cached copy offline, so an endpoint/configuration change is not indefinitely masked by a stale shell cache. The PWA still serves the site under `/uoemmulembe/`, using relative manifest paths and standalone display. As with any offline shell, the first successful online installation is needed before offline viewing. Very large original photographs increase first-install download size; originals are deliberately kept unchanged.
 
-The committed root output includes all ten generated routes, `styles.css`, `app.js`, `manifest.json`, `service-worker.js`, the preserved emblem, logo-derived PWA PNG icons, the four requested portraits, the unmodified `BUDGET (1).PDF`, the shared icon sprite and the proposed-budget JSON/CSV. The manifest and service-worker scope use relative `./` paths so they remain inside the repository's `/uoemmulembe/` Pages path. The worker pre-caches the public routes and essential supplied materials; external Facebook and web-font resources remain online-only. The Python generator and validator use the standard library. The published site has no private member backend, registration, authentication, confidential welfare submission, administration or voting features.
+## M-Pesa processing is not connected
 
-## PWA installation and offline behavior
+The donation UI is deliberately inactive on GitHub Pages: `data/donation-client-config.json` has `enabled: false` and an empty endpoint, so the client sends no donation request and does not simulate success. See [`daraja-integration.md`](daraja-integration.md) for the request/response contract and required backend security work. A static-site deployment cannot hold Daraja secrets, securely initiate STK Push or verify callbacks. Do not set the client enabled flag until a secure HTTPS backend exists, is configured and has passed provider sandbox and operational testing.
 
-Android visitors can open the site in Chrome and select the on-page **Install app** prompt when available, or use the browser menu to choose **Install app** / **Add to Home screen**. The manifest launches the site in standalone mode. After the first successful cache install, all ten public routes, the four supplied photos, the budget booklet, logo/icons and budget data are available offline. The browser may need a first online load to install and populate the service worker cache.
+## Preserved content
 
+The generator does not transform supplied original photos or the budget booklet. The validator checks the booklet's original SHA-256, proposal totals and actuals-unknown state, supplied leadership-to-role mappings, the distinct University delegate boundary, the complete supplied 18-name About section, route/navigation links, icon assets and PWA cache resources.
 
-## Verification for the portrait, booklet and PWA update
+## Verification
 
-The generated site and validator passed before publication. A Chromium/Playwright run served the repository under the same `/uoemmulembe/` path used by GitHub Pages. Home, leadership, gallery, budget and documents pages were checked at 390px, 768px, 1024px and 1440px widths with no horizontal overflow. The three supplied executive portraits and the separately labeled University delegate loaded; all four gallery images opened at their original JPEG URLs. Budget income/allocation switching, the embedded PDF path, the exact view/download controls and the `BUDGET (1).PDF` download filename were checked.
+Before publication, build and run:
 
-The service worker activated with scope `/uoemmulembe/` and populated 26 same-origin app-shell resources, including all ten routes, the four portraits, logo/icons, proposal data and original PDF. With Chromium taken offline after installation, the leadership route and budget page reopened and the cached portrait files and PDF remained fetchable. The four supplied JPEGs, `BUDGET (1).PDF` and existing emblem were also hash-compared with the upload commit `1379e6a`; all matched. Responsive, route and browser behavior were tested locally; Android's actual install UI still depends on a compatible browser and a successful HTTPS visit to the live Pages site.
+```sh
+python3 scripts/build_site.py
+python3 scripts/check_site.py
+node --check app.js
+node --check service-worker.js
+```
+
+Browser checks should include the direct routes at phone/tablet/desktop widths, category filters, full-size dialog controls, donation input/inactive response with network inspection confirming no request, budget PDF links, service-worker activation/cache, and offline route/image access. Live Pages availability and the Actions run must be verified after pushing; local checks alone do not prove publication.

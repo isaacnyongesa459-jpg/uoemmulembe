@@ -1,0 +1,16 @@
+{
+  "contractVersion": 1,
+  "enabled": false,
+  "apiEndpoint": "",
+  "currency": "KES",
+  "request": {
+    "amountKes": "positive integer",
+    "phoneNumber": "E.164 Kenyan mobile number, e.g. +254712345678",
+    "purpose": "MULEMBE_UNION_DONATION"
+  },
+  "backendResponse": {
+    "status": ["pending", "successful", "failed"],
+    "transactionReference": "server-generated opaque identifier"
+  },
+  "note": "Static Pages cannot process payments; no credentials or PINs belong in this file or in browser code."
+}

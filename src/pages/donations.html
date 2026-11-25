@@ -1,0 +1,26 @@
+<section class="page-heading donation-heading">
+  <div class="heading-copy"><p class="eyebrow">COMMUNITY SUPPORT</p><h1 aria-label="Support MULEMBE Union">Support<br><span>MULEMBE Union.</span></h1><p>Members, supporters and well-wishers can contribute to support Union initiatives. Payment processing is not connected yet.</p></div>
+  <div class="mpesa-mark" aria-label="M-Pesa donation option">M</div>
+</section>
+
+<section class="section-block donation-layout" aria-labelledby="donation-title">
+  <div class="donation-intro"><p class="eyebrow">GIVE WITH PURPOSE</p><h2 id="donation-title">Support the work we do together.</h2><p>Your contribution can help support Union initiatives and collective activities. Choose an amount and provide a Kenyan phone number for the future M-Pesa STK Push flow.</p>
+    <div class="donation-notice"><span class="notice-symbol" aria-hidden="true">i</span><div><strong>Payments are not active yet</strong><p>Daraja and a secure payment backend have not been connected. This page will not initiate or collect a payment.</p></div></div>
+    <ol class="donation-steps"><li><span>01</span><div><strong>Choose an amount</strong><small>Select a suggested amount or enter a custom amount in Kenyan shillings.</small></div></li><li><span>02</span><div><strong>Enter your number</strong><small>Use a Kenyan mobile number. A PIN is never requested on this website.</small></div></li><li><span>03</span><div><strong>Future secure prompt</strong><small>Once a verified backend is connected, an STK Push may be sent to your phone for you to complete in M-Pesa.</small></div></li></ol>
+  </div>
+
+  <section class="donation-card" id="donation-form" data-donation-endpoint="" aria-describedby="donation-disclosure" aria-labelledby="donation-card-title">
+    <div class="donation-card-head"><span class="mpesa-badge">M-PESA</span><span class="donation-unavailable"><i aria-hidden="true"></i> NOT CONNECTED</span></div>
+    <h2 id="donation-card-title">Choose your contribution</h2>
+    <fieldset class="amount-fieldset"><legend>Suggested amounts</legend><div class="amount-options"><label class="amount-option"><input type="radio" name="suggestedAmount" value="100" checked><span>KSh 100</span></label><label class="amount-option"><input type="radio" name="suggestedAmount" value="200"><span>KSh 200</span></label><label class="amount-option"><input type="radio" name="suggestedAmount" value="500"><span>KSh 500</span></label><label class="amount-option"><input type="radio" name="suggestedAmount" value="1000"><span>KSh 1,000</span></label><label class="amount-option"><input type="radio" name="suggestedAmount" value="2000"><span>KSh 2,000</span></label></div></fieldset>
+    <div class="donation-field"><label for="custom-amount">Or enter a custom amount (KSh)</label><input id="custom-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter whole shillings"></div>
+    <div class="donation-field"><label for="donation-phone">Kenyan phone number</label><input id="donation-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="0712345678 or +254712345678" pattern="(?:\+?254|0)(?:7|1)[0-9]{8}" maxlength="13" aria-describedby="phone-hint"><small id="phone-hint">Enter a Safaricom-compatible Kenyan mobile number (for example, 0712345678).</small></div>
+    <button class="button button-primary donation-submit" type="button" data-donation-submit>Donate with M-Pesa <span aria-hidden="true">→</span></button>
+    <p class="donation-disclosure" id="donation-disclosure"><strong>No payment will be initiated.</strong> Actual processing awaits a secure hosted backend and Safaricom Daraja integration.</p>
+    <div class="payment-status" id="donation-status" role="status" aria-live="polite" aria-atomic="true"><span class="status-indicator" aria-hidden="true"></span><span><strong>Inactive</strong><small>No transaction has been started.</small></span></div>
+    <div class="future-status" aria-label="Status types supported after secure integration"><span>Pending</span><span>Successful</span><span>Failed</span><small>Backend-reported statuses only</small></div>
+    <p class="pin-warning">Never enter or share your M-Pesa PIN on this website.</p>
+  </section>
+</section>
+
+<section class="integration-note" aria-labelledby="integration-title"><div class="integration-icon" aria-hidden="true">⌘</div><div><p class="eyebrow">FUTURE INTEGRATION POINT</p><h2 id="integration-title">Built for a secure Daraja connection</h2><p>The interface includes a disabled-by-default, configurable same-origin API endpoint and an STK Push request/status contract for a future backend. Daraja credentials, PIN entry, callback verification and payment confirmation must stay server-side. See the repository’s Daraja integration notes for the contract.</p></div></section>

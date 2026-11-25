@@ -27,3 +27,5 @@ jobs:
         run: node --check app.js
       - name: Check service worker syntax
         run: node --check service-worker.js
+      - name: Validate checked-in JSON sources
+        run: python3 -c "import json; from pathlib import Path; [json.loads(Path(p).read_text(encoding='utf-8')) for p in ['src/pages.json', 'data/gallery-manifest.json', 'data/donation-client-config.json', 'data/proposed-budget-2026-27.json', 'manifest.json']]"

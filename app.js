@@ -229,6 +229,193 @@
   }));
   loadBudget();
 
+  const galleryGrid = document.querySelector('[data-gallery-grid]');
+  const galleryCards = galleryGrid ? [...galleryGrid.querySelectorAll('[data-gallery-card]')] : [];
+  const galleryFilters = [...document.querySelectorAll('[data-gallery-filter]')];
+  const galleryEmpty = document.querySelector('[data-gallery-empty]');
+  const galleryFilterCount = document.querySelector('[data-gallery-filter-count]');
+  const viewer = document.querySelector('#gallery-viewer');
+  const viewerImage = viewer?.querySelector('[data-viewer-image]');
+  const viewerPosition = viewer?.querySelector('[data-viewer-position]');
+  const viewerTitle = viewer?.querySelector('[data-viewer-title]');
+  const viewerDescription = viewer?.querySelector('[data-viewer-description]');
+  const viewerClose = viewer?.querySelector('[data-viewer-close]');
+  let visibleGalleryLinks = [];
+  let viewerIndex = 0;
+  let lastGalleryTrigger = null;
+
+  function refreshGalleryFilterCount() {
+    const visibleCount = galleryCards.filter(card => !card.hidden).length;
+    if (galleryFilterCount) galleryFilterCount.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'photo' : 'photos'}`;
+    if (galleryEmpty) galleryEmpty.hidden = visibleCount !== 0;
+  }
+
+  galleryFilters.forEach(button => button.addEventListener('click', () => {
+    const selected = button.dataset.galleryFilter;
+    galleryFilters.forEach(filter => {
+      const active = filter === button;
+      filter.classList.toggle('is-active', active);
+      filter.setAttribute('aria-pressed', String(active));
+    });
+    galleryCards.forEach(card => { card.hidden = selected !== 'all' && card.dataset.category !== selected; });
+    refreshGalleryFilterCount();
+  }));
+
+  function activeGalleryLinks() {
+    return galleryCards.filter(card => !card.hidden)
+      .map(card => card.querySelector('[data-gallery-open]')).filter(Boolean);
+  }
+
+  function showGalleryPhoto(index) {
+    if (!viewer || !viewerImage || !visibleGalleryLinks.length) return;
+    viewerIndex = (index + visibleGalleryLinks.length) % visibleGalleryLinks.length;
+    const link = visibleGalleryLinks[viewerIndex];
+    const thumb = link.querySelector('img');
+    const caption = link.closest('figure')?.querySelector('figcaption');
+    const title = caption?.querySelector('strong')?.textContent || caption?.querySelector('.gallery-kind')?.textContent || 'MULEMBE Union photo';
+    viewerImage.src = link.href;
+    viewerImage.alt = thumb?.alt || title;
+    if (viewerTitle) viewerTitle.textContent = title;
+    if (viewerDescription) viewerDescription.textContent = caption?.querySelector('small')?.textContent || '';
+    if (viewerPosition) viewerPosition.textContent = `Photo ${viewerIndex + 1} of ${visibleGalleryLinks.length}`;
+    const previous = viewer.querySelector('[data-viewer-previous]');
+    const next = viewer.querySelector('[data-viewer-next]');
+    if (previous) previous.disabled = visibleGalleryLinks.length < 2;
+    if (next) next.disabled = visibleGalleryLinks.length < 2;
+  }
+
+  galleryGrid?.addEventListener('click', event => {
+    const trigger = event.target.closest('[data-gallery-open]');
+    if (!trigger || !viewer?.showModal) return;
+    event.preventDefault();
+    visibleGalleryLinks = activeGalleryLinks();
+    const index = visibleGalleryLinks.indexOf(trigger);
+    if (index < 0) return;
+    lastGalleryTrigger = trigger;
+    showGalleryPhoto(index);
+    viewer.showModal();
+    viewerClose?.focus({ preventScroll: true });
+  });
+  viewerClose?.addEventListener('click', () => viewer?.close());
+  viewer?.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
+  viewer?.addEventListener('close', () => {
+    if (viewerImage) viewerImage.removeAttribute('src');
+    lastGalleryTrigger?.focus({ preventScroll: true });
+  });
+  viewer?.querySelector('[data-viewer-previous]')?.addEventListener('click', () => showGalleryPhoto(viewerIndex - 1));
+  viewer?.querySelector('[data-viewer-next]')?.addEventListener('click', () => showGalleryPhoto(viewerIndex + 1));
+  viewer?.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') { event.preventDefault(); showGalleryPhoto(viewerIndex - 1); }
+    if (event.key === 'ArrowRight') { event.preventDefault(); showGalleryPhoto(viewerIndex + 1); }
+  });
+  const viewerImageWrap = viewer?.querySelector('.viewer-image-wrap');
+  let touchStartX = null;
+  viewerImageWrap?.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0]?.screenX ?? null; }, { passive: true });
+  viewerImageWrap?.addEventListener('touchend', event => {
+    const endX = event.changedTouches[0]?.screenX;
+    if (touchStartX === null || typeof endX !== 'number') return;
+    const delta = endX - touchStartX;
+    if (Math.abs(delta) > 55) showGalleryPhoto(viewerIndex + (delta < 0 ? 1 : -1));
+    touchStartX = null;
+  }, { passive: true });
+  if (galleryCards.length) refreshGalleryFilterCount();
+
+  const donationCard = document.querySelector('#donation-form');
+  const donationButton = donationCard?.querySelector('[data-donation-submit]');
+  const donationStatus = document.querySelector('#donation-status');
+  const customAmount = document.querySelector('#custom-amount');
+  const phoneInput = document.querySelector('#donation-phone');
+  const amountRadios = [...document.querySelectorAll('input[name="suggestedAmount"]')];
+  let donationConfig = { enabled: false, apiEndpoint: '' };
+
+  function setDonationStatus(state, title, message) {
+    if (!donationStatus) return;
+    donationStatus.dataset.state = state;
+    donationStatus.classList.remove('is-pending', 'is-successful', 'is-failed', 'is-unavailable');
+    if (state !== 'inactive') donationStatus.classList.add(`is-${state}`);
+    const titleNode = donationStatus.querySelector('strong');
+    const messageNode = donationStatus.querySelector('small');
+    if (titleNode) titleNode.textContent = title;
+    if (messageNode) messageNode.textContent = message;
+  }
+
+  async function loadDonationConfig() {
+    if (!donationCard) return;
+    try {
+      const response = await fetch('data/donation-client-config.json', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Donation configuration unavailable (${response.status})`);
+      const config = await response.json();
+      if (config.contractVersion !== 1 || config.currency !== 'KES') throw new Error('Unsupported donation contract');
+      donationConfig = { enabled: config.enabled === true, apiEndpoint: typeof config.apiEndpoint === 'string' ? config.apiEndpoint : '' };
+      if (!donationConfig.enabled || !donationConfig.apiEndpoint) {
+        donationConfig = { enabled: false, apiEndpoint: '' };
+        setDonationStatus('inactive', 'Inactive', 'No transaction has been started.');
+      }
+    } catch (error) {
+      donationConfig = { enabled: false, apiEndpoint: '' };
+      setDonationStatus('inactive', 'Inactive', 'Payment service is not connected; no payment can be made.');
+      console.error(error);
+    }
+  }
+
+  amountRadios.forEach(radio => radio.addEventListener('change', () => { if (customAmount) customAmount.value = ''; }));
+
+  donationButton?.addEventListener('click', async () => {
+    const customValue = customAmount?.value.trim() || '';
+    const selectedValue = amountRadios.find(radio => radio.checked)?.value || '';
+    const amount = Number(customValue || selectedValue);
+    const phone = phoneInput?.value.trim() || '';
+    const phonePattern = /^(?:\+?254|0)(?:7|1)[0-9]{8}$/;
+    if (!Number.isSafeInteger(amount) || amount < 1) {
+      setDonationStatus('invalid', 'Check the amount', 'Enter a positive whole-shilling amount. No payment was initiated.');
+      customAmount?.focus();
+      return;
+    }
+    if (!phonePattern.test(phone)) {
+      setDonationStatus('invalid', 'Check the phone number', 'Enter a Kenyan mobile number such as 0712345678. No payment was initiated.');
+      phoneInput?.focus();
+      return;
+    }
+    if (!donationConfig.enabled || !donationConfig.apiEndpoint) {
+      setDonationStatus('inactive', 'Inactive', 'Payments are not connected. No payment was initiated. Never enter an M-Pesa PIN here.');
+      return;
+    }
+
+    let endpoint;
+    try {
+      endpoint = new URL(donationConfig.apiEndpoint, window.location.href);
+      if (endpoint.origin !== window.location.origin || endpoint.protocol !== 'https:') throw new Error('Donation endpoint must be same-origin HTTPS');
+    } catch {
+      setDonationStatus('unavailable', 'Unavailable', 'The configured payment endpoint is not a safe same-origin HTTPS URL. No request was sent.');
+      return;
+    }
+    const normalizedPhone = phone.startsWith('+') ? phone : phone.startsWith('0') ? `+254${phone.slice(1)}` : `+${phone}`;
+    donationButton.disabled = true;
+    setDonationStatus('pending', 'Connecting securely', 'The backend has not yet confirmed a payment request.');
+    try {
+      const response = await fetch(endpoint.href, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ contractVersion: 1, amountKes: amount, phoneNumber: normalizedPhone, currency: 'KES', purpose: 'MULEMBE_UNION_DONATION' })
+      });
+      const result = await response.json();
+      const acceptedStatuses = ['pending', 'successful', 'failed'];
+      if (!response.ok || !acceptedStatuses.includes(result.status)) throw new Error('No valid payment status was returned by the backend.');
+      const messages = {
+        pending: ['Pending', 'The backend accepted the request. Wait for an M-Pesa prompt; never share your PIN here.'],
+        successful: ['Successful', 'The secure backend reports this transaction as verified.'],
+        failed: ['Failed', 'The secure backend reports that this transaction did not complete.']
+      };
+      setDonationStatus(result.status, messages[result.status][0], messages[result.status][1]);
+    } catch (error) {
+      setDonationStatus('unavailable', 'Unable to confirm', 'No verified response was received. Check with the Union before trying again.');
+      console.error(error);
+    } finally {
+      donationButton.disabled = false;
+    }
+  });
+  loadDonationConfig();
+
   const installButton = document.querySelector('[data-pwa-install]');
   let installPrompt = null;
   if (installButton) {
