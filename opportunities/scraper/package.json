@@ -1,0 +1,17 @@
+{
+  "name": "mulembe-opportunities-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "scrape": "node src/cli.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "cheerio": "1.2.0",
+    "robots-parser": "3.1.1"
+  }
+}

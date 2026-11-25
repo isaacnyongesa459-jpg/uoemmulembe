@@ -49,3 +49,10 @@ GitHub Actions runs the build, site validator and JavaScript syntax checks. GitH
 ## Live website
 
 <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. See [`docs/deployment.md`](docs/deployment.md) for the confirmed Pages publishing model and deployment verification.
+
+
+## Global Opportunities Aggregator — Stage 1
+
+The first step is a manual, single-source Node.js scraper in [`opportunities/scraper/`](opportunities/scraper/). It checks the source's live `robots.txt`, uses paced requests and records candidates locally as `pending_verification`. Its generated output is Git-ignored. It is not yet connected to a public Opportunities page, Express API, database, daily schedule or admin dashboard; those stages require a separate backend/runtime decision. See [`docs/opportunities-architecture.md`](docs/opportunities-architecture.md) and the [scraper instructions](opportunities/scraper/README.md).
+
+From the repository root, run `cd opportunities/scraper && npm ci && npm test` for the fixture tests, then `npm run scrape` for a manual source run. Do not publish the local pending data without provider verification.

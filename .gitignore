@@ -1,2 +1,7 @@
 __pycache__/
 *.py[cod]
+
+# Local Global Opportunities scraper artifacts
+/opportunities/scraper/node_modules/
+/opportunities/scraper/out/
+/opportunities/scraper/.env
