@@ -41,3 +41,7 @@ node --check app.js
 ```
 
 A GitHub Actions workflow runs these checks before publishing. Deployment availability depends on repository Pages/Actions settings and the workflow completing successfully.
+
+## Deployment status
+
+The GitHub Pages workflow is committed, but Pages is not yet live: the repository must first be set to use **GitHub Actions** as the Pages build source. See [`docs/deployment.md`](docs/deployment.md) for the verified blocker, workflow run links and one-time setup steps.
