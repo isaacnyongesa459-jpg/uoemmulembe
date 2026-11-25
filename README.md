@@ -37,6 +37,6 @@ node --check app.js
 
 The GitHub Actions workflow generates routes in both validation and deployment jobs, verifies local pages/links/assets and source-status disclosures, then assembles the static Pages artifact.
 
-## GitHub Pages status
+## Live website
 
-The expected address is <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. Immediately before this redesign push, GitHub returned HTTP 200 and reported the existing Pages source as `main` at the repository root (`build_type=legacy`). That confirms the previous deployment was reachable; verify the homepage and latest Actions run to confirm the redesigned commit is served. See [`docs/deployment.md`](docs/deployment.md) for the recorded source state and workflow details.
+The website is live at <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. The redesigned revision `d942f204cc381b46c76cc782595dec313be17a51` deployed through [GitHub Actions run 45608739113](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45608739113). A live smoke test returned HTTP 200 for all ten routes and all six required site assets. See [`docs/deployment.md`](docs/deployment.md) for the Pages source and verification details.
