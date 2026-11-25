@@ -228,4 +228,32 @@
     if (budget?.[view]) renderBudget(view);
   }));
   loadBudget();
+
+  const installButton = document.querySelector('[data-pwa-install]');
+  let installPrompt = null;
+  if (installButton) {
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      installPrompt = event;
+      installButton.hidden = false;
+    });
+    installButton.addEventListener('click', async () => {
+      if (!installPrompt) return;
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice?.outcome === 'accepted') installButton.hidden = true;
+      installPrompt = null;
+    });
+    window.addEventListener('appinstalled', () => {
+      installButton.hidden = true;
+      installPrompt = null;
+    });
+  }
+
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js', { scope: './' })
+        .catch(error => console.error('Offline support could not be enabled.', error));
+    }, { once: true });
+  }
 })();

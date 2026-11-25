@@ -1,8 +1,8 @@
 {
   "title": "UOEM Mulembe Union proposed budget and annual course of action, AY 2026/2027",
   "dataStatus": "PROPOSED_ONLY",
-  "sourceStatus": "Figures transcribed from the supplied project brief; original PDF was not present in the repository or attachments.",
-  "originalPdfAvailable": false,
+  "sourceStatus": "Figures remain transcribed from the supplied project brief; the original proposed-budget PDF is now available separately as BUDGET (1).PDF and has not been used to recalculate this summary.",
+  "originalPdfAvailable": true,
   "financialYear": {
     "start": "2026-05",
     "end": "2027-04",

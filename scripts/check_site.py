@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -18,6 +19,8 @@ class PageParser(HTMLParser):
         self.ids: list[str] = []
         self.fragments: list[str] = []
         self.local_paths: list[str] = []
+        self.image_paths: list[str] = []
+        self.embedded_paths: list[str] = []
         self.nav_routes: list[str] = []
         self.facebook_links: list[dict[str, str]] = []
         self.title = ""
@@ -58,7 +61,9 @@ class PageParser(HTMLParser):
         if tag == "img" and attributes.get("src"):
             parsed = urlparse(attributes["src"])
             if not parsed.scheme and not attributes["src"].startswith("//"):
-                self.local_paths.append(unquote(parsed.path))
+                local_path = unquote(parsed.path)
+                self.local_paths.append(local_path)
+                self.image_paths.append(local_path)
         if tag == "link" and attributes.get("href"):
             href = attributes["href"]
             parsed = urlparse(href)
@@ -69,6 +74,20 @@ class PageParser(HTMLParser):
             parsed = urlparse(src)
             if not parsed.scheme and not src.startswith("//"):
                 self.local_paths.append(unquote(parsed.path))
+        if tag == "iframe" and attributes.get("src"):
+            src = attributes["src"]
+            parsed = urlparse(src)
+            if not parsed.scheme and not src.startswith("//"):
+                local_path = unquote(parsed.path)
+                self.local_paths.append(local_path)
+                self.embedded_paths.append(local_path)
+        if tag == "object" and attributes.get("data"):
+            data = attributes["data"]
+            parsed = urlparse(data)
+            if not parsed.scheme and not data.startswith("//"):
+                local_path = unquote(parsed.path)
+                self.local_paths.append(local_path)
+                self.embedded_paths.append(local_path)
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "title":
@@ -138,6 +157,78 @@ def main() -> None:
             fail(f"unexpected public form/password collection on {route}")
         all_parsers[route] = parser
 
+    leadership_portraits = {
+        "1795606862985.jpg",
+        "1795606968206.jpg",
+        "1795609879513.jpg",
+    }
+    gallery_portraits = leadership_portraits | {"1795606945117.jpg"}
+    if not leadership_portraits.issubset(set(all_parsers["leadership.html"].image_paths)):
+        fail("one or more supplied leadership portraits are missing from the leadership page")
+    if not gallery_portraits.issubset(set(all_parsers["gallery.html"].image_paths)):
+        fail("one or more supplied portraits are missing from the gallery")
+    leadership_html = (ROOT / "leadership.html").read_text(encoding="utf-8")
+    executive_cards = re.findall(r'<article class="leader-card[^\"]*">(.*?)</article>', leadership_html, re.DOTALL)
+    executive_roles = {
+        "1795606862985.jpg": "Chairperson",
+        "1795609879513.jpg": "Secretary",
+        "1795606968206.jpg": "Treasurer",
+    }
+    for filename, role in executive_roles.items():
+        if not any(filename in card and f"<h3>{role}</h3>" in card for card in executive_cards):
+            fail(f"the supplied portrait is not paired with its assigned Union office: {filename} ({role})")
+    recognition = re.search(r'<section class="section-block recognition-section".*?</section>', leadership_html, re.DOTALL)
+    if not recognition:
+        fail("the University of Embu Male Delegate must remain in a separate recognition subsection")
+    recognition_text = recognition.group(0).lower()
+    if "1795606945117.jpg" not in recognition_text or "university of embu male delegate" not in recognition_text or "not a member of the mulembe union executive leadership" not in recognition_text:
+        fail("the University delegate recognition must use the supplied portrait and explicitly exclude Union executive status")
+    gallery_html = (ROOT / "gallery.html").read_text(encoding="utf-8")
+    gallery_cards = re.findall(r'<figure class="gallery-card[^\"]*">(.*?)</figure>', gallery_html, re.DOTALL)
+    gallery_roles = {**executive_roles, "1795606945117.jpg": "Male Delegate"}
+    for filename, role in gallery_roles.items():
+        matching_cards = [card for card in gallery_cards if filename in card and f"<strong>{role}</strong>" in card]
+        if not matching_cards:
+            fail(f"the gallery portrait is not paired with its assigned role: {filename} ({role})")
+        if filename == "1795606945117.jpg" and "not a mulembe union executive official" not in matching_cards[0].lower():
+            fail("the gallery must label the University delegate as separate from Union executives")
+    if "BUDGET (1).PDF" not in all_parsers["budget.html"].embedded_paths:
+        fail("the uploaded budget PDF is not embedded on the budget page")
+    if "BUDGET (1).PDF" not in all_parsers["budget.html"].local_paths or "BUDGET (1).PDF" not in all_parsers["documents.html"].local_paths:
+        fail("the budget booklet view/download links are missing")
+    for route in ("budget.html", "documents.html"):
+        body_text = (ROOT / route).read_text(encoding="utf-8")
+        if "View Budget Booklet" not in body_text or "Download Budget Booklet" not in body_text:
+            fail(f"the required budget booklet controls are missing from {route}")
+
+    for filename in gallery_portraits:
+        image = ROOT / filename
+        if not image.is_file() or image.read_bytes()[:2] != b"\xff\xd8":
+            fail(f"supplied portrait is missing or not a JPEG: {filename}")
+    booklet = ROOT / "BUDGET (1).PDF"
+    if not booklet.is_file() or booklet.read_bytes()[:5] != b"%PDF-":
+        fail("the uploaded budget booklet is missing or not a PDF")
+
+    manifest_path = ROOT / "manifest.json"
+    if not manifest_path.is_file():
+        fail("the PWA manifest is missing")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("display") != "standalone" or manifest.get("scope") != "./" or not manifest.get("start_url", "").startswith("./"):
+        fail("the PWA manifest must use standalone display and relative GitHub Pages paths")
+    icon_sizes = {icon.get("sizes") for icon in manifest.get("icons", [])}
+    if not {"192x192", "512x512"}.issubset(icon_sizes):
+        fail("the PWA manifest is missing required 192px or 512px app icons")
+    for icon in manifest.get("icons", []):
+        icon_path = (ROOT / unquote(urlparse(icon.get("src", "")).path)).resolve()
+        if not icon_path.is_relative_to(ROOT.resolve()) or not icon_path.is_file():
+            fail(f"PWA icon is missing or unsafe: {icon.get('src', '')}")
+    worker_path = ROOT / "service-worker.js"
+    if not worker_path.is_file():
+        fail("the PWA service worker is missing")
+    worker = worker_path.read_text(encoding="utf-8")
+    if "addEventListener('fetch'" not in worker or "cache.addAll(APP_SHELL)" not in worker:
+        fail("the service worker must pre-cache the app shell and handle offline fetches")
+
     logo = ROOT / "IMG-20261124-WA0001.jpg"
     if not logo.is_file() or logo.stat().st_size < 1000 or logo.read_bytes()[:2] != b"\xff\xd8":
         fail("the existing official logo is missing or no longer a JPEG")
@@ -158,8 +249,8 @@ def main() -> None:
         fail("proposed allocation items do not match the stated total")
     if data["proposedIncomeTotal"] != 69500 or data["proposedAllocationTotal"] != 59000:
         fail("proposal totals differ from the source brief")
-    if data.get("originalPdfAvailable") is not False or data.get("actualTransactions") != []:
-        fail("missing source-PDF or actual-transaction status disclosure")
+    if data.get("originalPdfAvailable") is not True or data.get("actualTransactions") != []:
+        fail("uploaded source-PDF availability or actual-transaction status is incorrect")
     if any(data.get(key) is not None for key in ("actualIncome", "actualExpenditure", "actualBalance")):
         fail("actual financial amounts must remain unknown")
     with (ROOT / "data" / "proposed-budget-2026-27.csv").open(encoding="utf-8", newline="") as csv_file:
@@ -174,9 +265,10 @@ def main() -> None:
         "updates.html": "no verified notices yet",
         "events.html": "not confirmed or scheduled events",
         "budget.html": "actual position",
-        "documents.html": "original pdf unavailable",
+        "documents.html": "budget booklet available",
         "members.html": "no sign-in or registration is available",
-        "gallery.html": "no photos supplied",
+        "gallery.html": "not presented as a mulembe union executive leader",
+        "leadership.html": "our pride – university of embu leadership",
         "contact.html": FACEBOOK_URL.lower(),
     }
     for route, required_text in checks.items():
@@ -184,10 +276,12 @@ def main() -> None:
             fail(f"required source/status disclosure is missing from {route}: {required_text}")
 
     print(f"PASS: {len(expected_routes)} direct routes have unique titles, headings, links and complete navigation")
-    print("PASS: official logo preserved; local icons and assets resolve")
+    print("PASS: official logo preserved; supplied portraits and budget PDF resolve and are integrated")
+    print("PASS: supplied portrait filenames match their assigned roles; University delegate is separately recognized")
+    print("PASS: relative PWA manifest, icons and offline-capable service worker are present")
     print("PASS: supplied Facebook link is consistent and uses safe external-link attributes")
     print("PASS: proposed income/allocation totals reconcile; actual financials remain unknown")
-    print("PASS: notice, event, PDF, member-security and gallery status disclosures are present")
+    print("PASS: notice, event, booklet, member-security and delegate-separation disclosures are present")
     print("PASS: no public registration, password, or member-data forms were introduced")
 
 

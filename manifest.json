@@ -1,0 +1,48 @@
+{
+  "id": "./",
+  "name": "University of Embu Mulembe Union",
+  "short_name": "UOEM Mulembe",
+  "description": "The University of Embu Mulembe Union public information and community app.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#171715",
+  "background_color": "#f7f7f3",
+  "categories": ["education", "social"],
+  "icons": [
+    {
+      "src": "assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Union leadership",
+      "short_name": "Leadership",
+      "url": "./leadership.html",
+      "icons": [{ "src": "assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Mulembe Union Budget",
+      "short_name": "Budget",
+      "url": "./budget.html",
+      "icons": [{ "src": "assets/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

@@ -22,4 +22,15 @@ If the repository administrator later changes Pages **Build and deployment → S
 
 ## Published files
 
-The committed root output includes all ten generated routes, `styles.css`, `app.js`, the preserved emblem, `assets/icons.svg` and the proposed-budget JSON/CSV. The Python generator and check use only the standard library. The published site has no private member backend, registration, authentication, confidential welfare submission, administration or voting features.
+The committed root output includes all ten generated routes, `styles.css`, `app.js`, `manifest.json`, `service-worker.js`, the preserved emblem, logo-derived PWA PNG icons, the four requested portraits, the unmodified `BUDGET (1).PDF`, the shared icon sprite and the proposed-budget JSON/CSV. The manifest and service-worker scope use relative `./` paths so they remain inside the repository's `/uoemmulembe/` Pages path. The worker pre-caches the public routes and essential supplied materials; external Facebook and web-font resources remain online-only. The Python generator and validator use the standard library. The published site has no private member backend, registration, authentication, confidential welfare submission, administration or voting features.
+
+## PWA installation and offline behavior
+
+Android visitors can open the site in Chrome and select the on-page **Install app** prompt when available, or use the browser menu to choose **Install app** / **Add to Home screen**. The manifest launches the site in standalone mode. After the first successful cache install, all ten public routes, the four supplied photos, the budget booklet, logo/icons and budget data are available offline. The browser may need a first online load to install and populate the service worker cache.
+
+
+## Verification for the portrait, booklet and PWA update
+
+The generated site and validator passed before publication. A Chromium/Playwright run served the repository under the same `/uoemmulembe/` path used by GitHub Pages. Home, leadership, gallery, budget and documents pages were checked at 390px, 768px, 1024px and 1440px widths with no horizontal overflow. The three supplied executive portraits and the separately labeled University delegate loaded; all four gallery images opened at their original JPEG URLs. Budget income/allocation switching, the embedded PDF path, the exact view/download controls and the `BUDGET (1).PDF` download filename were checked.
+
+The service worker activated with scope `/uoemmulembe/` and populated 26 same-origin app-shell resources, including all ten routes, the four portraits, logo/icons, proposal data and original PDF. With Chromium taken offline after installation, the leadership route and budget page reopened and the cached portrait files and PDF remained fetchable. The four supplied JPEGs, `BUDGET (1).PDF` and existing emblem were also hash-compared with the upload commit `1379e6a`; all matched. Responsive, route and browser behavior were tested locally; Android's actual install UI still depends on a compatible browser and a successful HTTPS visit to the live Pages site.
