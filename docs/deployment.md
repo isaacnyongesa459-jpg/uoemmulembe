@@ -2,12 +2,12 @@
 
 ## Current status
 
-The static site and automated validation are committed to `main`. The validation job passed, but the Pages deployment is **not yet available**. At the latest check, `https://isaacnyongesa459-jpg.github.io/uoemmulembe/` returned HTTP 404.
+The static site and automated validation are committed to `main`. The latest workflow run's **Validate static site** job succeeded, but its **Publish to GitHub Pages** job failed before artifact upload or deployment. At the latest site check, `https://isaacnyongesa459-jpg.github.io/uoemmulembe/` returned HTTP 404; it is **not live**.
 
-GitHub Actions cannot create the Pages site for this repository. `actions/configure-pages` failed with `Resource not accessible by integration` when it attempted to initialize Pages. The workflow already requests `pages: write` and `id-token: write`, but GitHub still requires the repository owner to initialize Pages once in repository settings.
+GitHub Actions cannot create the Pages site for this repository. `actions/configure-pages` first received `Not Found` when checking for an existing Pages site, then failed to create one with `Resource not accessible by integration`. The workflow already requests `pages: write` and `id-token: write`, but GitHub still requires the repository owner to initialize Pages once in repository settings.
 
-- Failed deployment run (initial attempt): https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45597891026
-- Failed deployment run (after adding automatic enablement): https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45598014737
+- Latest run (validation succeeded; Pages setup failed): https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45603243307
+- Earlier failed deployment run: https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45598014737
 - Repository Pages settings: https://github.com/isaacnyongesa459-jpg/uoemmulembe/settings/pages
 - Deployment workflow: `.github/workflows/pages.yml`
 
