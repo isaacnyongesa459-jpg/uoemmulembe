@@ -2,7 +2,7 @@
 
 ## Implementation
 
-Keep the current repository, official emblem and dependency-free HTML/CSS/JavaScript stack. Maintain authored page fragments and route metadata in `src/`; a small Python standard-library generator wraps each fragment in a shared, semantic page shell and emits direct-access root routes (`index.html`, `about.html`, `leadership.html`, `updates.html`, `events.html`, `budget.html`, `documents.html`, `members.html`, `gallery.html` and `contact.html`). GitHub Pages will continue to serve the generated files as static content under the existing repository subpath; links and assets therefore stay relative. The existing proposed-budget JSON/CSV data remains the source for the budget page. Update the repository check and Pages workflow to build the pages before validating and publishing.
+Keep the current repository, official emblem and dependency-free HTML/CSS/JavaScript stack. Maintain authored page fragments and route metadata in `src/`; a small Python standard-library generator wraps each fragment in a shared, semantic page shell and emits direct-access root routes (`index.html`, `about.html`, `leadership.html`, `updates.html`, `events.html`, `budget.html`, `documents.html`, `members.html`, `gallery.html` and `contact.html`). GitHub Pages is configured to serve the repository's `main` branch root, so committed root-level output is published at the existing URL. Keep links and assets relative so all routes work under the repository subpath. The existing proposed-budget JSON/CSV remains the source for the budget page. The GitHub Actions workflow builds the pages, validates their content and links, and checks JavaScript syntax; branch-root Pages handles publication.
 
 Use shared `styles.css`, `app.js` and a small same-origin SVG icon sprite. The desktop shell has a persistent section sidebar and utility header; mobile has a five-item bottom navigation and an accessible drawer for the remaining routes. Every route is fully rendered in HTML (not dependent on JavaScript), has its own title/description and active navigation state, and can be loaded directly. JavaScript is limited to mobile navigation, global public-page search, budget-chart switching, the current year and a restrained page-entry transition. Honor keyboard operation, visible focus, reduced-motion preferences and safe external-link attributes.
 
@@ -21,4 +21,5 @@ Preserve all known union content and disclose its status: role-only leadership; 
 - `assets/icons.svg`: same-origin icons for navigation and the supplied Facebook link.
 - `index.html` and other root `.html` files: generated, GitHub Pages-direct routes.
 - `styles.css`, `app.js`: shared responsive design system and progressive enhancement.
-- `scripts/check_site.py`, `.github/workflows/pages.yml`: validate all routes, links and disclosures; build before deploy.
+- `scripts/check_site.py`: validate generated routes, navigation, links, budget data and source-status disclosures.
+- `.github/workflows/pages.yml`: build and validate the root output before the branch-root Pages publisher serves it.

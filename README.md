@@ -35,8 +35,8 @@ python3 scripts/check_site.py
 node --check app.js
 ```
 
-The GitHub Actions workflow generates routes in both validation and deployment jobs, verifies local pages/links/assets and source-status disclosures, then assembles the static Pages artifact.
+GitHub Pages serves the generated root-level files from `main` at `/`. The GitHub Actions workflow builds and validates all routes, assets, disclosures and JavaScript syntax on each push; Pages itself publishes the branch-root files.
 
 ## Live website
 
-The website is live at <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. The redesigned revision `d942f204cc381b46c76cc782595dec313be17a51` deployed through [GitHub Actions run 45608739113](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45608739113). A live smoke test returned HTTP 200 for all ten routes and all six required site assets. See [`docs/deployment.md`](docs/deployment.md) for the Pages source and verification details.
+The website is live at <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. A live smoke test returned HTTP 200 for all ten direct routes and all six required site assets. See [`docs/deployment.md`](docs/deployment.md) for the confirmed Pages source, the successful initial workflow deployment and the reason the redundant deploy job was removed.

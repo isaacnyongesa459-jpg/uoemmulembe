@@ -1,4 +1,4 @@
-name: Validate and deploy UOEM website
+name: Validate UOEM GitHub Pages
 
 on:
   push:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: github-pages
+  group: uoem-pages-validation
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate static site
+    name: Build and validate static pages
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -25,38 +25,3 @@ jobs:
         run: python3 scripts/check_site.py
       - name: Check JavaScript syntax
         run: node --check app.js
-
-  deploy:
-    name: Publish to GitHub Pages
-    needs: validate
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Build static pages
-        run: python3 scripts/build_site.py
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Assemble public site artifact
-        run: |
-          mkdir -p _site/data _site/assets
-          cp *.html app.js styles.css IMG-20261124-WA0001.jpg _site/
-          cp assets/icons.svg _site/assets/
-          cp data/proposed-budget-2026-27.json data/proposed-budget-2026-27.csv _site/data/
-      - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - name: Deploy site
-        id: deployment
-        uses: actions/deploy-pages@v4
