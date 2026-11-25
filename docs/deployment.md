@@ -2,23 +2,22 @@
 
 ## Current status
 
-The static site and automated validation are committed to `main`. The latest workflow run's **Validate static site** job succeeded, but its **Publish to GitHub Pages** job failed before artifact upload or deployment. At the latest site check, `https://isaacnyongesa459-jpg.github.io/uoemmulembe/` returned HTTP 404; it is **not live**.
+The expected website URL is <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. Immediately before the redesign push, it returned HTTP 200. The GitHub Pages API reported `build_type: legacy` with source branch `main` and path `/`. This confirms that the previous deployment was reachable, but does not confirm that a later commit has deployed.
 
-GitHub Actions cannot create the Pages site for this repository. `actions/configure-pages` first received `Not Found` when checking for an existing Pages site, then failed to create one with `Resource not accessible by integration`. The workflow already requests `pages: write` and `id-token: write`, but GitHub still requires the repository owner to initialize Pages once in repository settings.
+The existing source serves root-level static files, and every new route, stylesheet, script, icon and budget-data URL is relative for the repository subpath. After the redesign push, verify the new homepage and direct routes at the public URL. The GitHub Actions workflow also builds and validates the routes and assembles a Pages artifact; check its new run rather than assuming the workflow's deployment step succeeded.
 
-- Latest run (validation succeeded; Pages setup failed): https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45603243307
-- Earlier failed deployment run: https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45598014737
-- Repository Pages settings: https://github.com/isaacnyongesa459-jpg/uoemmulembe/settings/pages
-- Deployment workflow: `.github/workflows/pages.yml`
+The last confirmed workflow run before this redesign was [45603243307](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45603243307): validation succeeded, but `actions/configure-pages` failed before artifact upload with `Not Found` while checking for a Pages site and `Resource not accessible by integration` while trying to create one. The previous run is [45598014737](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/runs/45598014737). These are historical attempts; verify the latest run for the redesign.
 
-## One-time setup by a repository administrator
+- Repository Pages settings: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/settings/pages>
+- Deployment workflow: <https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/workflows/pages.yml>
+- Repository: <https://github.com/isaacnyongesa459-jpg/uoemmulembe>
 
-1. Open [Repository Settings → Pages](https://github.com/isaacnyongesa459-jpg/uoemmulembe/settings/pages).
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Confirm that GitHub Actions are enabled for this repository.
-4. Open the [deployment workflow](https://github.com/isaacnyongesa459-jpg/uoemmulembe/actions/workflows/pages.yml) and select **Run workflow** on `main` (or push another commit).
-5. Confirm the `Validate static site` and `Publish to GitHub Pages` jobs both succeed. The deployment environment output should then provide the actual published URL.
+## If the Actions deployment needs a source change
 
-The expected project URL is <https://isaacnyongesa459-jpg.github.io/uoemmulembe/>. Do not treat it as live until it returns the site rather than the current 404.
+The existing `main`-root Pages configuration serves generated root routes directly. If a fresh Actions run confirms that the workflow cannot deploy with this legacy source, a repository administrator can switch **Settings → Pages → Build and deployment → Source** to **GitHub Actions**, then rerun the workflow on `main`. Confirm both **Validate static site** and **Publish to GitHub Pages** succeed and use the deployment environment URL as the published link.
 
-The workflow validates HTML fragment links and assets, proposed-budget arithmetic and labels, and JavaScript syntax. Its deployment artifact contains only `index.html`, `styles.css`, `app.js`, the preserved emblem, and the proposed-budget JSON/CSV data.
+Do not describe the redesign as live until the public URL serves the redesigned homepage. A successful HTTP response to the existing URL alone is not proof that the latest commit has deployed.
+
+## Published artifact
+
+The validation job builds and checks all ten direct HTML routes, navigation, local links and assets, Facebook URL consistency, proposal-only disclosures, budget arithmetic and JavaScript syntax. The deployment job packages all generated root HTML pages, `styles.css`, `app.js`, the preserved emblem, `assets/icons.svg` and the existing proposed-budget JSON/CSV files.
